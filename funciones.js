@@ -1,133 +1,97 @@
-import { anadir, info, actualizar, eliminar, obtener } from './firebase.js'
+import { eliminar, getData, obtener, save, update } from "./firebase.js"
 
 let id = 0
-
-document.getElementById('btn-enviar').addEventListener('click', async () => {
-    validarRecommend()
-    validarOpinion()
+document.getElementById('btnGuardar').addEventListener('click', () => {
     document.querySelectorAll('.form-control').forEach(item => {
         verificar(item.id)
     })
-
-    if (document.querySelectorAll('.is-invalid').length === 0) {
-        if (document.getElementById('btn-enviar').value === 'Enviar') {
-            const formulario = {
-                'nombreCompleto': document.getElementById('nombreCompleto').value,
-                'email': document.getElementById('email').value,
+    if (document.querySelectorAll('.is-invalid').length == 0) {
+        if (document.getElementById('btnGuardar').value == 'Guardar') {
+            const alumno = {
+                'run': document.getElementById('run').value,
+                'nom': document.getElementById('nombre').value,
+                'ape': document.getElementById('apellido').value,
                 'fecha': document.getElementById('fecha').value,
-                'producto': document.getElementById('producto').value,
-                'calificacion': document.getElementById('calificacion').value,
-                'comentario': document.getElementById('comentario').value,
-                'opinion': document.querySelector('input[name="opinion"]:checked').value,
-                'recomendacion': document.querySelector('input[name="recomendacion"]:checked').value,
-                'sugerencias': document.getElementById('sugerencias').value
+                'asig': document.getElementById('asig').value,
+                'fapoderado': document.getElementById('fapoderado').value,
+                'matricula': document.getElementById('matricula').value
             }
-            const agregado = await anadir(formulario);
-            if(!agregado){
-                Swal.fire({
-                    title: "Error",
-                    text: "Ese correo ya esta registrado",
-                    icon: "error"
-                })
-            } else {
-                Swal.fire({
-                    title: "Enviado",
-                    text: "Formulario enviado con exito",
-                    icon: "success"
-                }).then(() => {
-                    limpiar()
-                })
-            }
-        } else {
-            const formulario = {
-                'nombreCompleto': document.getElementById('nombreCompleto').value,
-                'email': document.getElementById('email').value,
-                'fecha': document.getElementById('fecha').value,
-                'producto': document.getElementById('producto').value,
-                'calificacion': document.getElementById('calificacion').value,
-                'comentario': document.getElementById('comentario').value,
-                'opinion': document.querySelector('input[name="opinion"]:checked').value,
-                'recomendacion': document.querySelector('input[name="recomendacion"]:checked').value,
-                'sugerencias': document.getElementById('sugerencias').value
-            }
-            actualizar(id,formulario)
+            save(alumno)
             limpiar()
-
+        }else{
+            const alumno = {
+                'run': document.getElementById('run').value,
+                'nom': document.getElementById('nombre').value,
+                'ape': document.getElementById('apellido').value,
+                'fecha': document.getElementById('fecha').value,
+                'asig': document.getElementById('asig').value,
+                'fapoderado': document.getElementById('fapoderado').value,
+                'matricula': document.getElementById('matricula').value
+            }
+            update(id,alumno)
+            limpiar()
             id = 0
         }
     }
 })
-
 window.addEventListener('DOMContentLoaded', () => {
-    info((collection) => {
-        let tabla = '';
-
-        collection.forEach(doc => {
-            const item = doc.data();
+    getData((collection) => {
+        let tabla = ''
+        collection.forEach((doc) => {
+            const item = doc.data()
             tabla += `<tr>
-                <td>${item.nombreCompleto}</td>
-                <td>${item.email}</td>
-                <td>${item.fecha}</td>
-                <td>${item.producto}</td>
-                <td>${item.calificacion}</td>
-                <td>${item.comentario}</td>
-                <td>${item.opinion}</td>
-                <td>${item.recomendacion}</td>
-                <td>${item.sugerencias}</td>
-                <td nowrap>
-                    <button class="btn btn-warning" id="${doc.id}">Editar</button>
-                    <button class="btn btn-danger" id="${doc.id}">Eliminar</button>
-                </td>
-            </tr>`;
-        });
-
-        document.getElementById('contenido').innerHTML = tabla;
-
+            <td>${item.run}</td>
+            <td>${item.nom}</td>
+            <td>${item.ape}</td>
+            <td>${item.fecha}</td>
+            <td>${item.asig}</td>
+            <td>${item.fapoderado}</td>
+            <td>${item.matricula}</td>
+            <td nowrap>
+                <button class="btn btn-warning" id="${doc.id}">Editar</button>
+                <button class="btn btn-danger" id="${doc.id}">Eliminar</button>
+            </td>
+        </tr>`
+        })
+        document.getElementById('contenido').innerHTML = tabla
         document.querySelectorAll('.btn-danger').forEach(btn => {
             btn.addEventListener('click', () => {
                 Swal.fire({
-                    title: "¿Estás seguro de eliminar el registro?",
-                    text: "No podrás revertir los cambios",
+                    title: "¿Estás seguro de eliminar los datos?",
+                    text: "No se podran revertir los cambios",
                     icon: "error",
                     showCancelButton: true,
                     confirmButtonColor: "#d33",
                     cancelButtonColor: "#3085d6",
-                    confirmButtonText: "Eliminar"
+                    confirmButtonText: "Delete"
                 }).then((result) => {
                     if (result.isConfirmed) {
-                        eliminar(btn.id);
+                        eliminar(btn.id)
                         Swal.fire({
                             title: "Eliminado",
                             text: "Su registro ha sido eliminado",
                             icon: "success"
-                        });
+                        })
                     }
-                });
-            });
-        });
+                })
+            })
+        })
 
-        document.querySelectorAll('.btn-warning').forEach(btn => {
-            btn.addEventListener('click', async () => {
-                const doc = await obtener(btn.id);
-                const item =  doc.data();
+        document.querySelectorAll('.btn-warning').forEach( btn => {
+            btn.addEventListener('click',async() =>{
+                const doc = await obtener(btn.id)
+                const d = doc.data()
+                document.getElementById('run').value = d.run
+                document.getElementById('nombre').value = d.nom
+                document.getElementById('apellido').value = d.ape
+                document.getElementById('fecha').value = d.fecha
+                document.getElementById('asig').value = d.asig
+                document.getElementById('fapoderado').value = d.fapoderado
+                document.getElementById('matricula').value = d.matricula
+                document.getElementById('btnGuardar').value = 'Modificar'
+                id = btn.id
+            })
+        })
 
-                document.getElementById('nombreCompleto').value = item.nombreCompleto;
-                document.getElementById('email').value = item.email;
-                document.getElementById('fecha').value = item.fecha;
-                document.getElementById('producto').value = item.producto;
-                document.getElementById('calificacion').value = item.calificacion;
-                document.getElementById('comentario').value = item.comentario;
-
-                const opinionRadio = document.querySelector(`input[name="opinion"][value="${item.opinion}"]`);
-                opinionRadio.checked = true;
-
-                const recomendacionCheckbox = document.querySelector(`input[name="recomendacion"][value="${item.recomendacion}"]`);
-                recomendacionCheckbox.checked = true;
-
-                document.getElementById('sugerencias').value = item.sugerencias;
-
-                id = btn.id;
-            });
-        });
-    });
-});
+    })
+})
